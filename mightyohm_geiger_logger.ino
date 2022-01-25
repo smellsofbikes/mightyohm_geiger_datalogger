@@ -20,10 +20,7 @@ void setup() {
   }
   pinMode(interruptPin,INPUT_PULLUP);     // built-in resistor.
   attachInterrupt(nInterrupt,isr,RISING); // register interrupt service routine
-  millis_start=millis();                  // set up timer
-}
-void loop()
-{
+  millis_start=millis();
   char namebuffer[] = "GMlog00.txt";      // buffer for sdcard name
   for (uint8_t i = 0; i < 100; i++)       // neat bit of code from adafruit to make unique names rather than overwriting
   {
@@ -42,29 +39,28 @@ void loop()
     delay(1000);
     exit(0);
   }
-  logfile.print("milliseconds, CPM");
-
-  while(1)
+  logfile.println("milliseconds, CPM");
+}
+void loop()
+{
+  if (flag != 0)
   {
-    if (flag == 1)
-    {
-      Serial.print("logging ");
-      Serial.print(count);
-      Serial.println(" CPM");
-      logfile.print(millis());
-      logfile.print(", ");
-      logfile.println(count); // counts per minute
-      logfile.flush();
-      flag = 0;                               // clear 1 minute flag
-      count = 0;                              // and clear counter
-    }
+    Serial.print("logging ");
+    Serial.print(count);
+    Serial.println(" CPM");
+    logfile.print(millis());
+    logfile.print(", ");
+    logfile.println(count); // counts per minute
+    logfile.flush();
+    flag = 0;                               // clear 1 minute flag
+    count = 0;                              // and clear counter
   }
 }
 
 void isr() { // interrupt service routine
   count++;
   millis_total=millis();
-  if ((millis_total-millis_start)>60000L)     // kinda lousy way to check for 1 minute intervals
+    if ((millis_total-millis_start)>60000L)     // kinda lousy way to check for 1 minute intervals
   {
     flag = 1;                                 // set 1 minute flag
     millis_start=millis_total;
